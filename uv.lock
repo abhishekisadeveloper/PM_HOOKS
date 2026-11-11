@@ -725,10 +725,14 @@ version = "0.1.0"
 source = { editable = "." }
 dependencies = [
     { name = "fastapi", extra = ["standard"] },
+    { name = "pydantic-settings" },
 ]
 
 [package.metadata]
-requires-dist = [{ name = "fastapi", extras = ["standard", "standerd"], specifier = ">=0.162.1" }]
+requires-dist = [
+    { name = "fastapi", extras = ["standard", "standerd"], specifier = ">=0.162.1" },
+    { name = "pydantic-settings", specifier = ">=2.16.2" },
+]
 
 [[package]]
 name = "protobuf"

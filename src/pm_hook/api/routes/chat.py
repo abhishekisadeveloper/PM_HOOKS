@@ -49,4 +49,5 @@ def receive_chat_message(
     request: ChatMessageRequest
 ) -> ChatMessageResponse: # This is for the Editor Support to know what kind of data will you send to the client.
 
+    print(request.message)
     return acknowledge_message(request.message)
