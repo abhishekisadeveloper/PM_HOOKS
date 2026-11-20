@@ -8,6 +8,8 @@ class AppError(Exception):
         self.message = message
         self.code = code
         self.status_code = status_code
+        
+        # print("from apperror:" ...)
 
         super().__init__(message)
         
