@@ -11,7 +11,7 @@ from sqlalchemy import (
     Text,
     func,
 )
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from pm_hook.db.base import Base
 
@@ -63,3 +63,6 @@ class Task(Base):
         nullable=False,
         server_default=func.now(),
     )
+    project: Mapped["Project"] = relationship(
+    back_populates="tasks",
+)
