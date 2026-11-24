@@ -1,24 +1,10 @@
-# from fastapi import FastAPI
-
-# from pm_hook.api.routes import chat
-
-
-# app = FastAPI(
-#     title="PM Hooks API",
-#     description="Backend API for PM Hooks",
-#     version="0.1.0"
-# )
-
-
-# app.include_router(chat.router)
-
-
 from fastapi import FastAPI
 
 from pm_hook.api.routes import chat
 from pm_hook.api.exception_handlers import register_exception_handlers
 from pm_hook.core.config import get_settings
 from pm_hook.core.logging_config import configure_logging
+from pm_hook.api.routes import projects
 
 
 def create_app() -> FastAPI:
@@ -33,6 +19,10 @@ def create_app() -> FastAPI:
     )
 
     application.include_router(chat.router)
+    application.include_router(
+    projects.router,
+    prefix="/api",
+)
 
     register_exception_handlers(application)
 
