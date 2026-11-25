@@ -23,6 +23,7 @@ try:
     # This generates project.id without committing
     db.flush()
 
+
     project_id = project.id
 
     print(f"Created project ID: {project_id}")

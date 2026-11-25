@@ -51,6 +51,8 @@ def get_project_by_id_route(
     project = get_project_by_id(db, project_id)
 
     if project is None:
+        
+        # When error expected use AppError, When unexpected use intentional HTTP error like here we used. 
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Project not found",
