@@ -3,8 +3,8 @@ from fastapi import APIRouter, Depends, status, HTTPException
 from sqlalchemy.orm import Session
 
 from pm_hook.db.session import get_db
-from pm_hook.schemas.project import CreateProjectRequest, ProjectResponse
-from pm_hook.services.project_service import create_project, get_projects, get_project_by_id
+from pm_hook.schemas.project import CreateProjectRequest, ProjectResponse, UpdateProjectRequest
+from pm_hook.services.project_service import create_project, get_projects, get_project_by_id, update_project
 
 
 router = APIRouter(
@@ -26,6 +26,20 @@ def create_project_route(
     return project
 
 
+@router.patch(
+    "/{project_id}",
+    response_model=ProjectResponse,
+    status_code=status.HTTP_200_OK,
+)
+def update_project_route(
+    project_id: int,
+    update_data: UpdateProjectRequest,
+    db: Session = Depends(get_db),
+) -> ProjectResponse:
+    project = update_project(db, project_id, update_data)
+    return project
+
+
 @router.get(
     "/",
     response_model=list[ProjectResponse],
@@ -36,7 +50,6 @@ def get_projects_route(
 ) -> list[ProjectResponse]:
     projects = get_projects(db)
     return projects
-
 
 
 @router.get(
