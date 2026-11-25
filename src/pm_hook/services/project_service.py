@@ -72,3 +72,17 @@ def get_project_by_id(
     project = db.scalar(statement)
 
     return project
+
+
+def delete_project_by_id(db: Session, project_id: int) -> None:
+    project = get_project_by_id(db, project_id)
+
+    if project is None:
+        raise AppError(
+            message='Project not found',
+            code='PROJECT_NOT_FOUND',
+            status_code=status.HTTP_404_NOT_FOUND,
+        )
+
+    db.delete(project)
+    db.commit()

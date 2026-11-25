@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 
 from pm_hook.db.session import get_db
 from pm_hook.schemas.project import CreateProjectRequest, ProjectResponse, UpdateProjectRequest
-from pm_hook.services.project_service import create_project, get_projects, get_project_by_id, update_project
+from pm_hook.services.project_service import create_project, get_projects, get_project_by_id, update_project, delete_project_by_id
 
 
 router = APIRouter(
@@ -72,3 +72,11 @@ def get_project_by_id_route(
         )
 
     return project
+
+
+@router.delete("/{project_id}", status_code=204)
+def delete_project(
+    project_id: int,
+    db: Session = Depends(get_db),
+) -> None:
+    delete_project_by_id(db, project_id)
