@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from pm_hook.schemas.task import CreateTaskRequest, UpdateTaskRequest
+from pm_hook.schemas.task import CreateTaskRequest, UpdateTaskRequest, TaskStatus
 from pm_hook.models.project import Project
 from pm_hook.core.exceptions import AppError
 from fastapi import status
@@ -40,6 +40,9 @@ def create_task(
 def get_tasks_by_project(
     db: Session,
     project_id: int,
+    task_status: TaskStatus | None = None,
+    limit: int = 10,
+    offset: int = 0,
 ) -> list[Task]:
     project = db.get(Project, project_id)
 
@@ -49,11 +52,24 @@ def get_tasks_by_project(
             code="PROJECT_NOT_FOUND",
             status_code=status.HTTP_404_NOT_FOUND,
         )
+        
 
     statement = select(Task).where(
         Task.project_id == project_id
     )
 
+    if task_status is not None:
+        statement = statement.where(
+            Task.status == task_status.value
+        )
+        
+    statement = (
+        statement
+        .order_by(Task.id)
+        .limit(limit)
+        .offset(offset)
+    )
+        
     tasks = db.scalars(statement).all()
 
     return list(tasks)

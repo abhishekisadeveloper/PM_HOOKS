@@ -42,7 +42,6 @@ class UpdateTaskRequest(BaseModel):
             raise ValueError("Task status cannot be null")
         return value
 
-
 class TaskResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -53,3 +52,10 @@ class TaskResponse(BaseModel):
     status: TaskStatus
     due_date: date | None
     created_at: datetime
+
+
+class TaskListResponse(BaseModel):
+    items: list[TaskResponse]
+    total: int
+    limit: int
+    offset: int

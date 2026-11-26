@@ -1,11 +1,11 @@
     
 from pm_hook.services.task_service import create_task, get_tasks_by_project, get_task_by_id, update_task, delete_task
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, status, Query
 from sqlalchemy.orm import Session
 
 from pm_hook.db.session import get_db
-from pm_hook.schemas.task import CreateTaskRequest, TaskResponse, UpdateTaskRequest
+from pm_hook.schemas.task import CreateTaskRequest, TaskResponse, UpdateTaskRequest, TaskStatus
 
 
 router = APIRouter(
@@ -34,9 +34,22 @@ def create_task_route(
 )
 def get_tasks_by_project_route(
     project_id: int,
+    task_status: TaskStatus | None = Query(
+        default=None, # Remember: default=None makes it optional; 
+        alias="status" # alias changes the external parameter name.
+        ),
+    limit: int = Query(
+            default=10,
+            ge=1,
+            le=100,
+        ),
+    offset: int = Query(
+            default=0,
+            ge=0,
+        ),
     db: Session = Depends(get_db),
 ) -> list[TaskResponse]:
-    tasks = get_tasks_by_project(db, project_id)
+    tasks = get_tasks_by_project(db, project_id, task_status, limit=limit, offset=offset)
     
     return tasks
 
