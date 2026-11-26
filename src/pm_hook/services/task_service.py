@@ -57,3 +57,34 @@ def get_tasks_by_project(
     tasks = db.scalars(statement).all()
 
     return list(tasks)
+
+
+def get_task_by_id(
+    db: Session,
+    project_id: int,
+    task_id: int,
+) -> Task:
+    project = db.get(Project, project_id)
+
+    if project is None:
+        raise AppError(
+            message="Project not found",
+            code="PROJECT_NOT_FOUND",
+            status_code=status.HTTP_404_NOT_FOUND,
+        )
+
+    statement = select(Task).where(
+        Task.id == task_id,
+        Task.project_id == project_id,
+    )
+
+    task = db.scalar(statement)
+
+    if task is None:
+        raise AppError(
+            message="Task not found",
+            code="TASK_NOT_FOUND",
+            status_code=status.HTTP_404_NOT_FOUND,
+        )
+
+    return task

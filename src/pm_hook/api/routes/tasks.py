@@ -1,5 +1,5 @@
     
-from pm_hook.services.task_service import create_task, get_tasks_by_project
+from pm_hook.services.task_service import create_task, get_tasks_by_project, get_task_by_id
 
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
@@ -39,3 +39,18 @@ def get_tasks_by_project_route(
     tasks = get_tasks_by_project(db, project_id)
     
     return tasks
+
+
+@router.get(
+    "/{task_id}",
+    response_model=TaskResponse,
+    status_code=status.HTTP_200_OK,
+)
+def get_task_by_id_route(
+    project_id: int,
+    task_id: int,
+    db: Session = Depends(get_db),
+) -> TaskResponse:
+    task = get_task_by_id(db, project_id, task_id)
+
+    return task
