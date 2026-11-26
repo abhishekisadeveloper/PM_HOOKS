@@ -1,11 +1,11 @@
     
-from pm_hook.services.task_service import create_task, get_tasks_by_project, get_task_by_id
+from pm_hook.services.task_service import create_task, get_tasks_by_project, get_task_by_id, update_task, delete_task
 
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 
 from pm_hook.db.session import get_db
-from pm_hook.schemas.task import CreateTaskRequest, TaskResponse
+from pm_hook.schemas.task import CreateTaskRequest, TaskResponse, UpdateTaskRequest
 
 
 router = APIRouter(
@@ -54,3 +54,36 @@ def get_task_by_id_route(
     task = get_task_by_id(db, project_id, task_id)
 
     return task
+
+
+@router.patch(
+    "/{task_id}",
+    response_model=TaskResponse,
+    status_code=status.HTTP_200_OK,
+)
+def update_task_route(
+    project_id: int,
+    task_id: int,
+    task_data: UpdateTaskRequest,
+    db: Session = Depends(get_db),
+) -> TaskResponse:
+    task = update_task(
+        db,
+        project_id,
+        task_id,
+        task_data,
+    )
+
+    return task
+
+
+@router.delete(
+    "/{task_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+def delete_task_route(
+    project_id: int,
+    task_id: int,
+    db: Session = Depends(get_db),
+) -> None:
+    delete_task(db, project_id, task_id)

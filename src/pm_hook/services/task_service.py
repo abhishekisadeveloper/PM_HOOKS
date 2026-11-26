@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from pm_hook.schemas.task import CreateTaskRequest
+from pm_hook.schemas.task import CreateTaskRequest, UpdateTaskRequest
 from pm_hook.models.project import Project
 from pm_hook.core.exceptions import AppError
 from fastapi import status
@@ -88,3 +88,78 @@ def get_task_by_id(
         )
 
     return task
+
+
+def update_task(
+    db: Session,
+    project_id: int,
+    task_id: int,
+    task_data: UpdateTaskRequest,
+) -> Task:
+    project = db.get(Project, project_id)
+
+    if project is None:
+        raise AppError(
+            message="Project not found",
+            code="PROJECT_NOT_FOUND",
+            status_code=status.HTTP_404_NOT_FOUND,
+        )
+
+    statement = select(Task).where(
+        Task.id == task_id,
+        Task.project_id == project_id,
+    )
+
+    task = db.scalar(statement)
+
+    if task is None:
+        raise AppError(
+            message="Task not found",
+            code="TASK_NOT_FOUND",
+            status_code=status.HTTP_404_NOT_FOUND,
+        )
+
+    update_data = task_data.model_dump(exclude_unset=True)
+
+    for field, value in update_data.items():
+        if field == "status" and value is not None:
+            value = value.value
+
+        setattr(task, field, value)
+
+    db.commit()
+    db.refresh(task)
+
+    return task
+
+
+def delete_task(
+    db: Session,
+    project_id: int,
+    task_id: int,
+) -> None:
+    project = db.get(Project, project_id)
+
+    if project is None:
+        raise AppError(
+            message="Project not found",
+            code="PROJECT_NOT_FOUND",
+            status_code=status.HTTP_404_NOT_FOUND,
+        )
+
+    statement = select(Task).where(
+        Task.id == task_id,
+        Task.project_id == project_id,
+    )
+
+    task = db.scalar(statement)
+
+    if task is None:
+        raise AppError(
+            message="Task not found",
+            code="TASK_NOT_FOUND",
+            status_code=status.HTTP_404_NOT_FOUND,
+        )
+
+    db.delete(task)
+    db.commit()
