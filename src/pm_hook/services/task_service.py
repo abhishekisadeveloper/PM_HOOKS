@@ -56,7 +56,7 @@ def get_tasks_by_project(
 
     filters = [Task.project_id == project_id]
     
-    print(f"Task filters received: {filters.append(Task.status == task_status.value)}")  # Debugging line
+    print(f"Task filters received: {filters}")  # Debugging line
 
     if task_status is not None:
         filters.append(Task.status == task_status.value)
