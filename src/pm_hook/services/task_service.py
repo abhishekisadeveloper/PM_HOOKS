@@ -3,7 +3,7 @@ from pm_hook.schemas.task import CreateTaskRequest, UpdateTaskRequest, TaskStatu
 from pm_hook.models.project import Project
 from pm_hook.core.exceptions import AppError
 from fastapi import status
-from sqlalchemy import select
+from sqlalchemy import func, select
 
 from pm_hook.models.task import Task
 
@@ -37,42 +37,55 @@ def create_task(
     return task
 
 
+
 def get_tasks_by_project(
     db: Session,
     project_id: int,
     task_status: TaskStatus | None = None,
     limit: int = 10,
     offset: int = 0,
-) -> list[Task]:
+):
     project = db.get(Project, project_id)
 
     if project is None:
         raise AppError(
-            message="Project not found",
             code="PROJECT_NOT_FOUND",
-            status_code=status.HTTP_404_NOT_FOUND,
+            message="Project not found",
+            status_code=404,
         )
-        
 
-    statement = select(Task).where(
-        Task.project_id == project_id
-    )
+    filters = [Task.project_id == project_id]
+    
+    print(f"Task filters received: {filters.append(Task.status == task_status.value)}")  # Debugging line
 
     if task_status is not None:
-        statement = statement.where(
-            Task.status == task_status.value
-        )
-        
-    statement = (
-        statement
+        filters.append(Task.status == task_status.value)
+
+    count_stmt = (
+        select(func.count())
+        .select_from(Task)
+        .where(*filters)
+    )
+
+    total = db.scalar(count_stmt)
+
+    tasks_stmt = (
+        select(Task)
+        .where(*filters)
         .order_by(Task.id)
         .limit(limit)
         .offset(offset)
     )
-        
-    tasks = db.scalars(statement).all()
 
-    return list(tasks)
+    tasks = db.scalars(tasks_stmt).all()
+
+    return {
+        "items": tasks,
+        "total": total or 0,
+        "limit": limit,
+        "offset": offset,
+    }
+
 
 
 def get_task_by_id(

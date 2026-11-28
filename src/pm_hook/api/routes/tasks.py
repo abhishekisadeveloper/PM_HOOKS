@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, status, Query
 from sqlalchemy.orm import Session
 
 from pm_hook.db.session import get_db
-from pm_hook.schemas.task import CreateTaskRequest, TaskResponse, UpdateTaskRequest, TaskStatus
+from pm_hook.schemas.task import CreateTaskRequest, TaskResponse, UpdateTaskRequest, TaskStatus, TaskListResponse
 
 
 router = APIRouter(
@@ -29,7 +29,7 @@ def create_task_route(
 
 @router.get(
     "/",
-    response_model=list[TaskResponse],
+    response_model=TaskListResponse,
     status_code=status.HTTP_200_OK,
 )
 def get_tasks_by_project_route(
@@ -48,7 +48,7 @@ def get_tasks_by_project_route(
             ge=0,
         ),
     db: Session = Depends(get_db),
-) -> list[TaskResponse]:
+) -> TaskListResponse:
     tasks = get_tasks_by_project(db, project_id, task_status, limit=limit, offset=offset)
     
     return tasks
